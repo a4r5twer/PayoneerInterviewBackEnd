@@ -145,7 +145,7 @@ namespace Test
             // Both responses should have the same OrderId
             Assert.AreEqual(response1.OrderId, response2.OrderId);
             Assert.AreEqual("Success", response1.ResponseMessage);
-            Assert.AreEqual("Success", response2.ResponseMessage);
+            Assert.AreEqual("Already Created.", response2.ResponseMessage);
 
         }
     }

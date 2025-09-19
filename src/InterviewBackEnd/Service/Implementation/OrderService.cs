@@ -33,7 +33,8 @@ namespace InterviewBackEnd.Service.Implementation
                 {
                     _logger.LogWarning("Order Already Created.");
                     response.OrderId = request.OrderId;
-                    response.ResponseMessage = "Success";
+                    response.ResponseId = request.RequestId;
+                    response.ResponseMessage = "Already Created.";
                     return response;
                 }
                 // Let go merge all the item with same quantity together  
