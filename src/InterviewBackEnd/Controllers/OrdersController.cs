@@ -1,7 +1,9 @@
 using InterviewBackEnd.Infrastructure;
 using InterviewBackEnd.Model.Request;
 using InterviewBackEnd.Model.Response;
+using InterviewBackEnd.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace InterviewBackEnd.Controllers
 {
@@ -11,31 +13,34 @@ namespace InterviewBackEnd.Controllers
     {
 
         private readonly ILogger<OrdersController> _logger;
+        private readonly IOrderService _orderService;
 
-        public OrdersController(ILogger<OrdersController> logger)
+        public OrdersController(ILogger<OrdersController> logger, IOrderService orderService)
         {
             _logger = logger;
+            _orderService = orderService;
         }
 
         [HttpPost("orders", Name = "Orders")]
         [ServiceFilter(typeof(ValidateOrderRequestFilter))]
-        public CreateOrderResponse CreateOrder([FromBody] CreateOrderRequest request)
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
         {
             // Add RequestId to logging scope for end-to-end tracking
             using (_logger.BeginScope(new Dictionary<string, object>()
             {
-                { "RequestId",request.RequestId} 
-            }
-            ))
+                { "RequestId", request.RequestId }
+            }))
             {
-                _logger.LogInformation("Start.");
-                // Simulate order creation and return response with same RequestId
-                return new CreateOrderResponse
+                var response = await _orderService.CreateOrder(request);
+                if (response.OrderId != Guid.Empty)
                 {
-                    OrderId = request.OrderId,
-                    ResponseId = request.RequestId, // Echo RequestId for end-to-end trace
-                    ResponseMessage = "Order created successfully"
-                };
+                    // Return 201 Created with response body
+                    return Created(string.Empty, response);
+                }
+                else
+                {
+                    return Ok(response);
+                }
             }
         }
     }

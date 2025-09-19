@@ -15,6 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.RegisterFilters();
+builder.Services.RegisterDbContext(builder.Configuration.GetConnectionString("LocalTest"));
+builder.Services.RegisterServices();
 
 var app = builder.Build();
 

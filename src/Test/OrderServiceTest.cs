@@ -20,6 +20,7 @@ namespace Test
     {
         private Mock<ILogger<OrderService>> _loggerMock;
         private Mock<ILoggerFactory> _loggerFactoryMock;
+        private Mock<IDbContextFactory<OrderProcessContext>> _mockDbContextFactory;
         private IMapper _mapper;
         private OrderProcessContext _context;
         private OrderService _orderService;
@@ -29,6 +30,7 @@ namespace Test
         {
             _loggerMock = new Mock<ILogger<OrderService>>();
             _loggerFactoryMock = new Mock<ILoggerFactory>();
+            _mockDbContextFactory = new Mock<IDbContextFactory<OrderProcessContext>>();
             _loggerFactoryMock.Setup(x => x.CreateLogger(It.IsAny<string>()))
                 .Returns(_loggerMock.Object);
             var config = new MapperConfiguration(cfg =>
@@ -41,13 +43,14 @@ namespace Test
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
             _context = new OrderProcessContext(options);
-
+            _mockDbContextFactory.Setup(x => x.CreateDbContextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(_context);
             // Seed ProductStock
             _context.ProductStock.Add(new Stock { Id = 1, ProductName = "ProductA", Inventory = 10 });
             _context.ProductStock.Add(new Stock { Id = 2, ProductName = "ProductB", Inventory = 5 });
             _context.SaveChanges();
 
-            _orderService = new OrderService(_loggerMock.Object, _mapper, _context);
+            _orderService = new OrderService(_loggerMock.Object, _mapper, _mockDbContextFactory.Object);
         }
 
         [Test]
