@@ -35,7 +35,7 @@ namespace InterviewBackEnd.DataAccess
             {
                 entity.ToTable("OrderedItems");
                 entity.ToTable(z => z.HasCheckConstraint("CK_OrderedItems_Quantity_Positive", "[Quantity] > 0"));
-                entity.HasKey(z => z.Id);
+                entity.HasKey(z => z.OrderedItemKey);
                 entity.Property(x => x.Quantity)
                       .IsRequired();
                 // Relationship: Each OrderedItem references a Stock (Product)
@@ -51,14 +51,13 @@ namespace InterviewBackEnd.DataAccess
                 entity.ToTable(z => z.HasCheckConstraint("CK_ProductStock_Inventory_Positive", "[Inventory] >= 0"));
                 entity.Property(z => z.ProductName).IsRequired().HasMaxLength(20);
             });
+
+            modelBuilder.Entity<Stock>().HasData(
+                new Stock { Id = 4, ProductName = "ProductA", Inventory = 10, IsOutOfStock = false },
+                new Stock { Id = 5, ProductName = "ProductB", Inventory = 5, IsOutOfStock = false }
+            );
+
             base.OnModelCreating(modelBuilder);
         }
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    // Replace with your actual connection string
-        //    var connectionString = "Data Source=SHA-YFZHAO-L1\\SQLEXPRESS;Initial Catalog=BackEnd;Integrated Security=True;Persist Security Info=False;Pooling=False;Multiple Active Result Sets=False;Encrypt=False;Trust Server Certificate=False;Command Timeout=0";
-        //    optionsBuilder.UseSqlServer(connectionString);
-        //    base.OnConfiguring(optionsBuilder);
-        //}
     }
 }

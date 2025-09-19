@@ -1,18 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AutoMapper;
+using Azure;
+using InterviewBackEnd.AutoMapperProfile;
+using InterviewBackEnd.DataAccess;
 using InterviewBackEnd.Model.DAO;
 using InterviewBackEnd.Model.POCOS;
 using InterviewBackEnd.Model.Request;
 using InterviewBackEnd.Model.Response;
 using InterviewBackEnd.Service.Implementation;
-using InterviewBackEnd.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using InterviewBackEnd.AutoMapperProfile;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Test
 {
@@ -23,6 +24,7 @@ namespace Test
         private Mock<IDbContextFactory<OrderProcessContext>> _mockDbContextFactory;
         private IMapper _mapper;
         private OrderProcessContext _context;
+        private OrderProcessContext _secondContext;
         private OrderService _orderService;
 
         [SetUp]
@@ -43,6 +45,7 @@ namespace Test
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
             _context = new OrderProcessContext(options);
+            _secondContext = new OrderProcessContext(options);
             _mockDbContextFactory.Setup(x => x.CreateDbContextAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_context);
             // Seed ProductStock
@@ -114,6 +117,36 @@ namespace Test
             Assert.IsNotNull(response);
             Assert.AreEqual(response.OrderId, Guid.Empty);
             Assert.True(response.ResponseMessage.Contains("InsufficientInventory"));
+        }
+        [Test]
+        public async Task CreateOrder_Idempotence_SameOrderTwice_DoesNotCreateDuplicate()
+        {
+            var orderId = Guid.NewGuid();
+            var request = new CreateOrderRequest
+            {
+                OrderId = orderId,
+                CustomerName = "Idempotent Customer",
+                CreatedAt = DateTime.UtcNow,
+                Items = new List<Items>
+                {
+                    new Items { ProductId = 1, Quantity = 2 }
+                }
+            };
+
+            // First call
+            var response1 = await _orderService.CreateOrder(request);
+
+            var orderServiceCreatedLater = new OrderService(_loggerMock.Object, _mapper, _mockDbContextFactory.Object);
+            _mockDbContextFactory.Setup(x => x.CreateDbContextAsync(It.IsAny<CancellationToken>()))
+               .ReturnsAsync(_secondContext);
+            // Second call with the same OrderId and data
+            var response2 = await orderServiceCreatedLater.CreateOrder(request);
+
+            // Both responses should have the same OrderId
+            Assert.AreEqual(response1.OrderId, response2.OrderId);
+            Assert.AreEqual("Success", response1.ResponseMessage);
+            Assert.AreEqual("Success", response2.ResponseMessage);
+
         }
     }
 }

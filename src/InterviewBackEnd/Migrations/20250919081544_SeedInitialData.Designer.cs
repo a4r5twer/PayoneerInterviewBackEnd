@@ -4,6 +4,7 @@ using InterviewBackEnd.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InterviewBackEnd.Migrations
 {
     [DbContext(typeof(OrderProcessContext))]
-    partial class OrderProcessContextModelSnapshot : ModelSnapshot
+    [Migration("20250919081544_SeedInitialData")]
+    partial class SeedInitialData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,12 +49,6 @@ namespace InterviewBackEnd.Migrations
 
             modelBuilder.Entity("InterviewBackEnd.Model.DAO.OrderedItem", b =>
                 {
-                    b.Property<int>("OrderedItemKey")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderedItemKey"));
-
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
@@ -61,9 +58,7 @@ namespace InterviewBackEnd.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.HasKey("OrderedItemKey");
-
-                    b.HasIndex("Id");
+                    b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 

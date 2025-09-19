@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using InterviewBackEnd.DataAccess;
 using InterviewBackEnd.Model.DAO;
+using InterviewBackEnd.Model.POCOS;
 using InterviewBackEnd.Model.Request;
 using InterviewBackEnd.Model.Response;
 using InterviewBackEnd.Service.Interface;
@@ -27,6 +28,22 @@ namespace InterviewBackEnd.Service.Implementation
                 {
                     OrderId = Guid.Empty,
                 };
+                // Let's add some basic Idempotence check here 
+                if (_orderProcessContext.Orders.Any(x=>x.OrderId==request.OrderId))
+                {
+                    _logger.LogWarning("Order Already Created.");
+                    response.OrderId = request.OrderId;
+                    response.ResponseMessage = "Success";
+                    return response;
+                }
+                // Let go merge all the item with same quantity together  
+                var mergedItems = request.Items.GroupBy(x => x.ProductId)
+                    .Select(g => new Items
+                    {
+                        ProductId = g.Key,
+                        Quantity = g.Sum(x=>x.Quantity)    
+                    });
+                request.Items = mergedItems.ToList();
                 response.ResponseId = request.RequestId;
                 var orderToBeCreated = _mapper.Map<Order>(request);
                 await _orderProcessContext.Orders.AddAsync(orderToBeCreated);
