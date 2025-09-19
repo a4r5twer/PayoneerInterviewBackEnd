@@ -21,7 +21,22 @@ namespace InterviewBackEnd.Controllers
         [ServiceFilter(typeof(ValidateOrderRequestFilter))]
         public CreateOrderResponse CreateOrder([FromBody] CreateOrderRequest request)
         {
-            return new CreateOrderResponse();
+            // Add RequestId to logging scope for end-to-end tracking
+            using (_logger.BeginScope(new Dictionary<string, object>()
+            {
+                { "RequestId",request.RequestId} 
+            }
+            ))
+            {
+                _logger.LogInformation("Start.");
+                // Simulate order creation and return response with same RequestId
+                return new CreateOrderResponse
+                {
+                    OrderId = request.OrderId,
+                    ResponseId = request.RequestId, // Echo RequestId for end-to-end trace
+                    ResponseMessage = "Order created successfully"
+                };
+            }
         }
     }
 }

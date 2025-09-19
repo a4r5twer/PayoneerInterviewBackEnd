@@ -1,5 +1,11 @@
 using InterviewBackEnd.Infrastructure;
+using NLog.Extensions.Logging;
 var builder = WebApplication.CreateBuilder(args);
+
+//set up nlog for this project 
+builder.Logging.ClearProviders();
+builder.Logging.AddNLog("Nlog.config");
+
 
 // Add services to the container.
 
@@ -18,6 +24,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseErrorHandling();
+app.UseRequestResponseLogging();
 
 app.UseAuthorization();
 
