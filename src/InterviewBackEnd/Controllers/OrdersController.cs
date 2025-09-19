@@ -1,3 +1,4 @@
+using InterviewBackEnd.Infrastructure;
 using InterviewBackEnd.Model.Request;
 using InterviewBackEnd.Model.Response;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,7 @@ namespace InterviewBackEnd.Controllers
         }
 
         [HttpPost("orders", Name = "Orders")]
+        [ServiceFilter(typeof(ValidateOrderRequestFilter))]
         public CreateOrderResponse CreateOrder([FromBody] CreateOrderRequest request)
         {
             return new CreateOrderResponse();
