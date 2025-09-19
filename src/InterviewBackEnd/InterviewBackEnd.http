@@ -1,0 +1,85 @@
+@InterviewBackEnd_HostAddress = http://localhost:5238
+
+
+### Happy Path
+POST {{InterviewBackEnd_HostAddress}}/api/orders
+Accept:  */*
+Content-Type: application/json
+
+{
+  "RequestId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "OrderId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "CustomerName": "string",
+  "Items": [
+    {
+      "ProductId": 1,
+      "Quantity": 2
+    }
+  ],
+  "CreatedAt": "2025-09-19T08:42:24.808Z"
+}
+###
+
+
+###  Multipe item ordered 
+POST {{InterviewBackEnd_HostAddress}}/api/orders
+Accept:  */*
+Content-Type: application/json
+
+{
+	"RequestId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+	"OrderId": "00d7d8c7-8deb-429a-a659-9cbafad6519b",
+	"CustomerName": "string",
+	"Items": [
+		{
+			"ProductId": 4,
+			"Quantity": 1
+		},
+		{
+			"ProductId": 5,
+			"Quantity": 1
+		}
+	],
+	"CreatedAt": "2025-09-19T08:50:04.304Z"
+}
+
+### Item not exist
+
+POST {{InterviewBackEnd_HostAddress}}/api/orders
+Accept:  */*
+Content-Type: application/json
+
+{
+	"RequestId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+	"OrderId": "00d7d8c7-8deb-429a-a659-9cbafad6519a",
+	"CustomerName": "string",
+	"Items": [
+		{
+			"ProductId": 400,
+			"Quantity": 1
+		},
+		{
+			"ProductId": 5,
+			"Quantity": 1
+		}
+	],
+	"CreatedAt": "2025-09-19T08:50:04.304Z"
+}
+
+### Item exceed quantity 
+POST {{InterviewBackEnd_HostAddress}}/api/orders
+Accept:  */*
+Content-Type: application/json
+
+{
+	"RequestId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+	"OrderId": "00d7d8c7-8deb-429a-a659-9cbafad65190",
+	"CustomerName": "string",
+	"Items": [
+		{
+			"ProductId": 5,
+			"Quantity": 1000
+		}
+	],
+	"CreatedAt": "2025-09-19T08:50:04.304Z"
+}
